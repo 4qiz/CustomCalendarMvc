@@ -1,0 +1,117 @@
+﻿@using CustomElementsApp.ViewModels 
+@model CalendarViewModel
+
+@{
+    var daysInMonth = Model.DaysInMonth;
+
+    // Получаем первый день месяца
+    var firstDayOfMonth = new DateTime(Model.CurrentYear, Model.CurrentMonth, 1);
+    // Вычисляем первый день недели (в понедельник = 0, ..., воскресенье = 6)
+    int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+    // Преобразуем, чтобы неделя начиналась с понедельника
+    firstDayOfWeek = (firstDayOfWeek == 0) ? 6 : firstDayOfWeek - 1;
+
+    // Определение следующего и предыдущего месяца
+    int previousMonth = Model.CurrentMonth - 1;
+    int previousYear = Model.CurrentYear;
+    if (previousMonth < 1)
+    {
+        previousMonth = 12;
+        previousYear--;
+    }
+
+    int nextMonth = Model.CurrentMonth + 1;
+    int nextYear = Model.CurrentYear;
+    if (nextMonth > 12)
+    {
+        nextMonth = 1;
+        nextYear++;
+    }
+}
+
+<div class="calendar-header">
+    <a href="@Url.Action(Model.ActionName, Model.ControllerName, new { month = previousMonth, year = previousYear })">Previous Month</a>
+    <span>@Model.CurrentMonth / @Model.CurrentYear</span>
+    <a href="@Url.Action(Model.ActionName, Model.ControllerName, new { month = nextMonth, year = nextYear })">Next Month</a>
+</div>
+
+<table border="1" class="calendar">
+    <thead>
+        <tr>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @{
+                // Пустые ячейки до первого дня месяца
+                for (int i = 0; i < firstDayOfWeek; i++)
+                {
+                    <td></td>
+                }
+
+                for (int day = 1; day <= daysInMonth; day++)
+                {
+                    // Если день недели — воскресенье (6), начинаем новую строку
+                    if ((firstDayOfWeek + day - 1) % 7 == 0 && day > 1)
+                    {
+                        @: </tr><tr>
+                    }
+
+                    var currentDayDate = new DateTime(Model.CurrentYear, Model.CurrentMonth, day);
+                    var eventForDay = Model.Events.FirstOrDefault(e => e.Date.Date == currentDayDate.Date);
+
+                    <td>
+                        @day
+                        @if (eventForDay != null)
+                        {
+                            <br />
+                            <span style="color: red">@eventForDay.Title</span>
+                        }
+                    </td>
+                }
+            }
+        </tr>
+    </tbody>
+</table>
+
+<style>
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .calendar-header a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .calendar-header span {
+        font-weight: bold;
+    }
+
+    table.calendar {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table.calendar th, table.calendar td {
+        padding: 10px;
+        text-align: center;
+        width: 10%;
+    }
+
+    table.calendar td {
+        height: 100px;
+    }
+
+    table.calendar td span {
+        color: red;
+        font-weight: bold;
+    }
+</style>

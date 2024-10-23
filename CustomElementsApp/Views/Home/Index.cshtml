@@ -1,0 +1,77 @@
+﻿@using CustomElementsApp.ViewModels
+@model CalendarViewModel
+@{
+    var daysInMonth = DateTime.DaysInMonth(Model.CurrentYear, Model.CurrentMonth);
+    var firstDayOfMonth = new DateTime(Model.CurrentYear, Model.CurrentMonth, 1);
+    var firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+    var currentDate = DateTime.Now;
+
+    <h2>Calendar for @Model.CurrentMonth / @Model.CurrentYear</h2>
+}
+
+<table border="1" class="calendar">
+    <thead>
+        <tr>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @{
+                // Пустые ячейки до первого дня месяца
+                for (int i = 0; i < firstDayOfWeek; i++)
+                {
+                    <td></td>
+                }
+
+                for (int day = 1; day <= daysInMonth; day++)
+                {
+                    // Если день недели — воскресенье, начинаем новую строку
+                    if ((firstDayOfWeek + day - 1) % 7 == 0)
+                    {
+                        @: </tr><tr>
+                    }
+
+                    var currentDayDate = new DateTime(Model.CurrentYear, Model.CurrentMonth, day);
+                    var eventForDay = Model.Events.FirstOrDefault(e => e.Date.Date == currentDayDate.Date);
+
+                    <td>
+                        @day
+                        @if (eventForDay != null)
+                        {
+                            <br />
+                            <span style="color: lightcoral">@eventForDay.Title</span>
+                        }
+                    </td>
+                }
+            }
+        </tr>
+    </tbody>
+</table>
+
+<style>
+    table.calendar {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table.calendar th, table.calendar td {
+        padding: 10px;
+        text-align: center;
+    }
+
+    table.calendar td {
+        height: 100px;
+    }
+
+    table.calendar td span {
+        color: red;
+        font-weight: bold;
+    }
+</style>
